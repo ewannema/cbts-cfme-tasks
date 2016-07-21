@@ -54,5 +54,5 @@ end
 
 ```bash
 cd /var/www/miq/vmdb
-rake rake cbts:ae_domain:migrate[Config-Domain,/repository/migrations]
+rake cbts:ae_domain:migrate[Config-Domain,/repository/migrations]
 ```

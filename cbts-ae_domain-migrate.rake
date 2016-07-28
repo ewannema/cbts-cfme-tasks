@@ -1,3 +1,4 @@
+# Perform schema and instance migrations automatically.
 class MiqAutomateMigrator
   attr_reader :ae_domain_name
   attr_reader :migrations

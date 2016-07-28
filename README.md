@@ -3,7 +3,7 @@
 Scripts to ease management of a ManageIQ/CloudForms environment.
 
 ## Installation
-Place the *.rake files in the /var/www/miq/vmdb/lib/tasks directory on your CFME
+Place the ```*.rake``` files in the /var/www/miq/vmdb/lib/tasks directory on your CFME
 appliances.
 
 ## Commands
@@ -55,4 +55,17 @@ end
 ```bash
 cd /var/www/miq/vmdb
 rake cbts:ae_domain:migrate[Config-Domain,/repository/migrations]
+```
+
+
+### Basic automate domain management. ###
+```bash
+rake cbts:ae_domain:delete[ae_domain]                           # Delete the automate domain
+rake cbts:ae_domain:disable[ae_domain]                          # Disable the automate domain
+rake cbts:ae_domain:enable[ae_domain]                           # Enable the automate domain
+rake cbts:ae_domain:get_domain_below[ae_domain]                 # Return the name of the domain below this one
+rake cbts:ae_domain:is_enabled[ae_domain]                       # Determine if the domain is enabled
+rake cbts:ae_domain:list                                        # List the automate domains in priority order
+rake cbts:ae_domain:rename[ae_domain,new_name]                  # Rename the automate domain
+rake cbts:ae_domain:reorder_above[domain_to_move,above_domain]  # Move the priority of a domain above another
 ```

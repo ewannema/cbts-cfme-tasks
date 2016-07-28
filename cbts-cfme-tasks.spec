@@ -1,5 +1,5 @@
 Name:      cbts-cfme-tasks
-Version:   0.1
+Version:   0.2
 Release:   1
 Summary:   ManageIQ/CloudForms helper tasks.
 
@@ -24,7 +24,9 @@ cd %{_builddir}/%{name}
 install -m 0644 *.rake "%{buildroot}/var/www/miq/vmdb/lib/tasks"
 
 %files
+/var/www/miq/vmdb/lib/tasks/cbts-ae_domain-management.rake
 /var/www/miq/vmdb/lib/tasks/cbts-ae_domain-migrate.rake
+/var/www/miq/vmdb/lib/tasks/cbts-ae_domain-ordering.rake
 
 %post
 

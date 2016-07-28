@@ -27,6 +27,10 @@ class CbtsDomainManagement
     MiqAeDomain.order('priority DESC').map(&:name)
   end
 
+  def self.exists?(domain_name)
+    MiqAeDomain.find_by_name(domain_name) ? true : false
+  end
+
   def self.rename(domain_name, new_domain_name)
     domain = MiqAeDomain.find_by_name(domain_name)
     raise "Could not find the domain #{domain_name}." if domain.nil?
@@ -65,6 +69,11 @@ namespace :cbts do
     desc 'Determine if the domain is enabled.'
     task :is_enabled, [:ae_domain] => [:environment] do |_, args|
       puts CbtsDomainManagement.enabled?(args[:ae_domain])
+    end
+
+    desc 'Determine if the domain exists.'
+    task :exists, [:ae_domain] => [:environment] do |_, args|
+      puts CbtsDomainManagement.exists?(args[:ae_domain])
     end
 
     desc 'Enable the automate domain.'

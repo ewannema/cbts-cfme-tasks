@@ -1,4 +1,4 @@
-VERSION := 0.2
+VERSION := 0.3
 RELEASE := 1
 NAME := cbts-cfme-tasks
 

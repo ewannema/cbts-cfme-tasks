@@ -81,7 +81,7 @@ namespace :cbts do
       domain_name = args[:ae_domain]
       CbtsDomainManagement.enable(domain_name)
 
-      if CbtsDomainManagement.is_enabled(domain_name)
+      if CbtsDomainManagement.enabled?(domain_name)
         puts "Domain #{domain_name} is enabled."
       else
         raise "Unable to enable #{domain_name}."
@@ -93,7 +93,7 @@ namespace :cbts do
       domain_name = args[:ae_domain]
       CbtsDomainManagement.disable(args[:ae_domain])
 
-      if CbtsDomainManagement.is_enabled(domain_name)
+      if CbtsDomainManagement.enabled?(domain_name)
         raise "Unable to disable #{domain_name}."
       else
         puts "Domain #{domain_name} is disabled."

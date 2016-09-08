@@ -5,6 +5,7 @@ class MiqAutomateMigrator
 
   def initialize(ae_domain_name, migration_folder)
     @ae_domain_name = ae_domain_name
+    ensure_schema_migration_class_exists
     @migrations = {}
     @migration_folder = migration_folder
     load_migrations
@@ -20,6 +21,17 @@ class MiqAutomateMigrator
       ActiveRecord::Base.transaction do
         migration = Object.const_get(migrations[timestamp])
         migration.up(ae_domain_name)
+        record_migration(ae_domain_name, timestamp, migration)
+      end
+    end
+  end
+
+  # Make all migrations as up to date without running them. Useful when bringing
+  # an already deployed environment under control of Automate migrations.
+  def mark_up_to_date
+    @migrations.keys.sort.each do |timestamp|
+      ActiveRecord::Base.transaction do
+        migration = Object.const_get(migrations[timestamp])
         record_migration(ae_domain_name, timestamp, migration)
       end
     end
@@ -41,25 +53,28 @@ class MiqAutomateMigrator
     end
   end
 
-  def create_schema_migration_class(ae_domain_name)
+  def ensure_schema_migration_class_exists
     ns = MiqAeNamespace.find_or_create_by_fqname("/#{ae_domain_name}/Schema")
-    # Create the class
-    ns.ae_classes.create(name: 'Migrations')
+    unless ns.ae_classes.find { |c| c.name == 'Migrations' }
+      ns.ae_classes.create(name: 'Migrations')
+    end
   end
 
   def latest_timestamp
-    migration_class = MiqAeClass.find_by_fqname("/#{ae_domain_name}/Schema/Migrations")
-
-    if migration_class.nil?
-      migration_class = create_schema_migration_class(ae_domain_name)
-    end
+    migration_class =
+      MiqAeClass.find_by_fqname("/#{ae_domain_name}/Schema/Migrations")
     migration_class.ae_instances.map(&:name).sort.last.to_i
   end
 
   def record_migration(ae_domain_name, timestamp, migration)
-    migration_class = MiqAeClass.find_by_fqname("/#{ae_domain_name}/Schema/Migrations")
-    migration_class.ae_instances.create(name: timestamp)
-    puts "Migration #{timestamp} #{migration} was run successfully."
+    migration_class =
+      MiqAeClass.find_by_fqname("/#{ae_domain_name}/Schema/Migrations")
+    if migration_class.ae_instances.find { |i| i.name == timestamp.to_s }
+      puts "Migration #{timestamp} #{migration} is already marked as executed."
+    else
+      migration_class.ae_instances.create(name: timestamp.to_s)
+      puts "Migration #{timestamp} #{migration} is now marked as executed."
+    end
   end
 end
 
@@ -68,8 +83,17 @@ namespace :cbts do
     desc 'Apply domain migrations'
     task :migrate, [:ae_domain, :migration_dir] => [:environment] do |_, args|
       migrator = MiqAutomateMigrator.new(args[:ae_domain], args[:migration_dir])
-      puts "Checking #{migrator.migrations.count} migrations against #{migrator.ae_domain_name}"
+      puts "Checking #{migrator.migrations.count} migrations against "\
+           "#{migrator.ae_domain_name}"
       migrator.migrate
+    end
+
+    desc 'Mark all migrations as applied without running them.'
+    task :mark_up_to_date, [:ae_domain, :migration_dir] => [:environment] do |_, args|
+      migrator = MiqAutomateMigrator.new(args[:ae_domain], args[:migration_dir])
+      puts "Marking #{migrator.migrations.count} migrations as applied "\
+           "against #{migrator.ae_domain_name}"
+      migrator.mark_up_to_date
     end
   end
 end

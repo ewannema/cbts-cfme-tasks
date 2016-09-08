@@ -8,7 +8,7 @@ appliances.
 
 ## Commands
 
-### rake cbts:ae_domain_migrate
+### rake cbts:ae_domain:migrate
 
 In a standard deployment you may have a domain where your code resides and a
 separate domain where you copy classes and create instances for configuration
@@ -57,6 +57,28 @@ cd /var/www/miq/vmdb
 rake cbts:ae_domain:migrate[Config-Domain,/repository/migrations]
 ```
 
+### rake cbts:ae_domain:mark_as_up_to_date
+
+When first bringing a deployed system under management via domain migrations,
+any configuration that was applied manually must be marked as having already
+been executed so they are not run again.
+
+This command will mark all of the migrations in the migration directory as
+having been executed without actually executing them. Ideally this should only
+be done for older systems and only done when bringing them under management. If
+you find yourself running this multiple times on the same system it is probably
+an indication that something is wrong with your schema management process.
+
+For any new systems the migrations should be built in a way that they can all
+be run to get the domain in the shape it needs to be. In other words, this
+command should not apply to new systems.
+
+**Usage:**
+
+```bash
+cd /var/www/miq/vmdb
+rake cbts:ae_domain:mark_as_up_to_date[Config-Domain,/repository/migrations]
+```
 
 ### Basic automate domain management. ###
 ```bash

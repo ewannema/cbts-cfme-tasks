@@ -1,5 +1,5 @@
 Name:      cbts-cfme-tasks
-Version:   0.3
+Version:   0.4
 Release:   1
 Summary:   ManageIQ/CloudForms helper tasks.
 
@@ -31,5 +31,8 @@ install -m 0644 *.rake "%{buildroot}/var/www/miq/vmdb/lib/tasks"
 %post
 
 %changelog
+* Thu Sep 08 2016 Eric Wannemacher <eric@wannemacher.us> 0.4-1
+- Added rake:cbts:ae_domain:mark_up_to_date
+
 * Fri Jul 22 2016 Eric Wannemacher <eric@wannemacher.us> 0.1-1
 - Initial RPM release

@@ -57,7 +57,7 @@ cd /var/www/miq/vmdb
 rake cbts:ae_domain:migrate[Config-Domain,/repository/migrations]
 ```
 
-### rake cbts:ae_domain:mark_as_up_to_date
+### rake cbts:ae_domain:mark_up_to_date
 
 When first bringing a deployed system under management via domain migrations,
 any configuration that was applied manually must be marked as having already
@@ -77,7 +77,7 @@ command should not apply to new systems.
 
 ```bash
 cd /var/www/miq/vmdb
-rake cbts:ae_domain:mark_as_up_to_date[Config-Domain,/repository/migrations]
+rake cbts:ae_domain:mark_up_to_date[Config-Domain,/repository/migrations]
 ```
 
 ### Basic automate domain management. ###

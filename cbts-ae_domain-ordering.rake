@@ -1,30 +1,50 @@
 # Handle priority ordering of automate domains.
 class CbtsDomainOrdering
   def self.move_domain_above(moving_domain, above_domain)
-    raise 'Can not move ManageIQ' if moving_domain == 'ManageIQ'
+    moving = MiqAeDomain.find_by_name(moving_domain)
+    raise "Could not find the domain #{moving_domain}." unless moving
+    raise 'Can not move a system domain' if moving.system
 
-    # Reordering should not include the ManageIQ domain.
-    domains = MiqAeDomain.order('priority DESC').reject { |d| d.name == 'ManageIQ' }
+    tenant = moving.tenant
+    tenant_domains = tenant.ae_domains.order('priority').to_a
 
-    moving_domain_idx = domains.index { |d| d.name == moving_domain }
-    raise "Can not find moving domain #{moving_domain}" if moving_domain_idx.nil?
-    moving = domains.delete_at(moving_domain_idx)
+    # Move the domain to the correct spot.
+    tenant_domains.reject! { |d| d.id == moving.id }
 
-    above_domain_idx = domains.index { |d| d.name == above_domain }
-    raise "Can not find the reference domain #{above_domain}" if above_domain_idx.nil?
+    above_domain_idx = tenant_domains.index { |d| d.name == above_domain }
+    if above_domain_idx.nil?
+      raise "Can not find the reference domain #{above_domain}"
+    end
 
-    domains.insert(above_domain_idx, moving)
+    under_domain_idx = above_domain_idx + 1
+    if tenant_domains[under_domain_idx].try(:system)
+      raise 'Can not move a domain below a system domain.'
+    end
 
-    MiqAeDomain.reset_priority_by_ordered_ids(domains.map(&:id).reverse)
+    tenant_domains.insert(above_domain_idx + 1, moving)
+
+    # As of 20160921 there is a bug in the MIQ code that reverses the order of
+    # higher level tenants when a subtenant reorders their domains.
+    # tenant.reset_domain_priority_by_ordered_ids(tenant_domains.map(&:id))
+
+    # Priories are inconsistently applied depending on what domains
+    # are visible to the person reordering them. Any domains that were
+    # previously sorted were not re-ordered. Since that is the case I
+    # figured we should just be able to order the ones for this tenant.
+    tenant_domains.reject! { |d| d.name == MiqAeDatastore::MANAGEIQ_DOMAIN }
+    MiqAeDomain.reset_priority_by_ordered_ids(tenant_domains)
   end
 
   def self.get_domain_below(domain_name)
-    domains = MiqAeDomain.order('priority DESC').to_a
-    domain_idx = domains.index { |d| d.name == domain_name }
-    raise "Could not find the domain #{domain_name}." if domain_idx.nil?
+    domain = MiqAeDomain.find_by_name(domain_name)
+    raise "Could not find the domain #{domain_name}." unless domain
 
-    next_domain = domains[domain_idx + 1]
-    next_domain.try(:name)
+    tenant = domain.tenant
+    domains = tenant.ae_domains.order('priority').to_a
+    domain_idx = domains.index { |d| d.name == domain_name }
+
+    prev_domain = domain_idx.zero? ? nil : domains[domain_idx - 1]
+    prev_domain.try(:name)
   end
 end
 

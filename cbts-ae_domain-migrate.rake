@@ -4,6 +4,10 @@ class MiqAutomateMigrator
   attr_reader :migrations
 
   def initialize(ae_domain_name, migration_folder)
+    unless MiqAeDomain.find_by_name(ae_domain_name)
+      raise "Domain not found: #{ae_domain_name}"
+    end
+
     @ae_domain_name = ae_domain_name
     ensure_schema_migration_class_exists
     @migrations = {}

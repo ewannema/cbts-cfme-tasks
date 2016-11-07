@@ -82,6 +82,7 @@ rake cbts:ae_domain:mark_up_to_date[Config-Domain,/repository/migrations]
 
 ### Basic automate domain management. ###
 ```bash
+rake cbts:ae_domain:create[ae_domain,tenant_name]               # Create an empty automate domain for the tenant
 rake cbts:ae_domain:delete[ae_domain]                           # Delete the automate domain
 rake cbts:ae_domain:disable[ae_domain]                          # Disable the automate domain
 rake cbts:ae_domain:enable[ae_domain]                           # Enable the automate domain

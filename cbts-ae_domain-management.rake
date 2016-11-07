@@ -41,6 +41,19 @@ class CbtsDomainManagement
     new_domain_name
   end
 
+  def self.create(domain_name, tenant_name)
+    raise 'Domain already exists' if MiqAeDomain.find_by_name(domain_name)
+
+    # Tenant find_by_name does not work for the root customer. It seems to have
+    # the name My Company, but that is sometimes replaced by the renamed text.
+    tenant = Tenant.all.find { |t| t.name == tenant_name }
+    raise "Tenant #{tenant_name} not found." unless tenant
+
+    priority = MiqAeDomain.where(tenant: tenant).map(&:priority).max.to_i + 1
+    MiqAeDomain.create!(name: domain_name, system: false, enabled: false,
+                        tenant: tenant, priority: priority)
+  end
+
   def self.destroy(domain_name)
     domain = MiqAeDomain.find_by_name(domain_name)
     raise "Could not find the domain #{domain_name}." if domain.nil?
@@ -59,6 +72,11 @@ namespace :cbts do
     desc 'Rename the automate domain.'
     task :rename, [:ae_domain, :new_name] => [:environment] do |_, args|
       CbtsDomainManagement.rename(args[:ae_domain], args[:new_name])
+    end
+
+    desc 'Create an empty automate domain.'
+    task :create, [:ae_domain, :tenant_name] => [:environment] do |_, args|
+      CbtsDomainManagement.create(args[:ae_domain], args[:tenant_name])
     end
 
     desc 'Delete the automate domain.'

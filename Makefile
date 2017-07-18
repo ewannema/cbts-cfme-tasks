@@ -1,5 +1,5 @@
-VERSION := 1.0.0
-RELEASE := 2
+VERSION := 1.1.0
+RELEASE := 1
 NAME := cbts-cfme-tasks
 
 .PHONY: clean rpm

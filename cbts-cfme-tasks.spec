@@ -1,6 +1,6 @@
 Name:      cbts-cfme-tasks
-Version:   1.0.0
-Release:   2
+Version:   1.1.0
+Release:   1
 Summary:   ManageIQ/CloudForms helper tasks.
 
 Group:     Applications/System

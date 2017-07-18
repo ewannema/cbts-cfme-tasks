@@ -3,7 +3,7 @@ class CbtsDomainOrdering
   def self.move_domain_above(moving_domain, above_domain)
     moving = MiqAeDomain.find_by_name(moving_domain)
     raise "Could not find the domain #{moving_domain}." unless moving
-    raise 'Can not move a system domain' if moving.system
+    raise 'Can not move a system domain' if self.system_domain?(moving)
 
     tenant = moving.tenant
     tenant_domains = tenant.ae_domains.order('priority').to_a
@@ -17,7 +17,8 @@ class CbtsDomainOrdering
     end
 
     under_domain_idx = above_domain_idx + 1
-    if tenant_domains[under_domain_idx].try(:system)
+    under_domain = tenant_domains[under_domain_idx]
+    if under_domain && self.system_domain?(under_domain)
       raise 'Can not move a domain below a system domain.'
     end
 
@@ -45,6 +46,18 @@ class CbtsDomainOrdering
 
     prev_domain = domain_idx.zero? ? nil : domains[domain_idx - 1]
     prev_domain.try(:name)
+  end
+
+  private
+
+  def self.system_domain?(domain)
+    if domain.respond_to?(:system)
+      domain.system
+    elsif domain.respond_to?(:source)
+      domain.source == MiqAeDomain::SYSTEM_SOURCE
+    else
+      raise "Unable to determine if #{domain.name} is a system domain."
+    end
   end
 end
 

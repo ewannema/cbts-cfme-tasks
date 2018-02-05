@@ -50,8 +50,14 @@ class CbtsDomainManagement
     raise "Tenant #{tenant_name} not found." unless tenant
 
     priority = MiqAeDomain.where(tenant: tenant).map(&:priority).max.to_i + 1
-    MiqAeDomain.create!(name: domain_name, system: false, enabled: false,
-                        tenant: tenant, priority: priority)
+
+    if (MiqAeDomain.new.respond_to?(:system))
+      MiqAeDomain.create!(name: domain_name, system: false, enabled: false,
+                          tenant: tenant, priority: priority)
+    else
+      MiqAeDomain.create!(name: domain_name, source: MiqAeDomain::USER_SOURCE,
+                          enabled: false, tenant: tenant, priority: priority)
+    end
   end
 
   def self.destroy(domain_name)
